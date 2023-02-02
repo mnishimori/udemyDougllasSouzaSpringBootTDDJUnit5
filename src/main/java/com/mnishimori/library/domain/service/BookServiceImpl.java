@@ -21,6 +21,12 @@ public class BookServiceImpl implements BookService {
         return repository.save(book);
     }
 
+    @Override
+    public Book findById(Book book) {
+        return repository.findById(book.getId())
+            .orElseThrow(() -> new BusinessException("Livro não encontrado!"));
+    }
+
     private static void checkIfIsbnAlreadyExists(Book book, Book bookFound) {
         if (bookFound != null && !bookFound.getId().equals(book.getId())){
             throw new BusinessException("ISBN já cadastrado");

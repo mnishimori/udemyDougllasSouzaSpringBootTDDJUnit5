@@ -2,6 +2,7 @@ package com.mnishimori.library.presentation;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mnishimori.library.domain.model.Book;
@@ -107,6 +108,22 @@ public class BookControllerTest {
     mvc
         .perform(request)
         .andExpect(MockMvcResultMatchers.status().isBadRequest());
+  }
+
+  @Test
+  public void shouldGetDetailsFromBook() throws Exception {
+    var book = new Book();
+    book.setId(1L);
+
+    BDDMockito.given(service.findById(book)).willReturn(book);
+
+    MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+        .get(BOOK_API + "/" + book.getId())
+        .accept(MediaType.APPLICATION_JSON);
+
+    mvc
+        .perform(request)
+        .andExpect(status().isOk());
   }
 
   private static BookInputDto createNewBook() {
