@@ -15,21 +15,19 @@ import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@RestControllerAdvice
+@ControllerAdvice
 public class ApplicationControllerAdvice extends ResponseEntityExceptionHandler {
 
   @Autowired
   private MessageSource messageSource;
-
 
   @ExceptionHandler({MaxUploadSizeExceededException.class})
   public ResponseEntity<Object> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex,

@@ -1,7 +1,8 @@
 package com.mnishimori.library.domain.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.mnishimori.library.domain.model.Book;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ class BookRepositoryTest {
 
     var isbnExists = repository.existsByIsbn(isbn);
 
-    Assertions.assertThat(isbnExists).isEqualTo(true);
+    assertThat(isbnExists).isEqualTo(true);
   }
   @Test
   void shouldReturnFalseWhenDoesNotExistsABookWithIsbn(){
@@ -40,6 +41,40 @@ class BookRepositoryTest {
 
     var isbnExists = repository.existsByIsbn(isbn);
 
-    Assertions.assertThat(isbnExists).isEqualTo(false);
+    assertThat(isbnExists).isEqualTo(false);
   }
+
+  @Test
+  void shouldReturnABookWhenExistsABookWithId(){
+    var book = Book.builder().title("As aventuras").author("Artur").isbn("123456").build();
+    entityManager.persist(book);
+
+    var bookFound = repository.findById(book.getId());
+
+    assertThat(bookFound.isPresent()).isEqualTo(true);
+  }
+
+  @Test
+  void shouldSaveABook(){
+    var book = Book.builder().title("As aventuras").author("Artur").isbn("123456").build();
+
+    book = repository.save(book);
+
+    assertThat(book.getId()).isNotNull();
+  }
+
+  @Test
+  void shouldDeleteABook(){
+    var book = Book.builder().title("As aventuras").author("Artur").isbn("123456").build();
+    entityManager.persist(book);
+
+    Book bookFound = entityManager.find(Book.class, book.getId());
+
+    repository.delete(bookFound);
+
+    Book bookDeleted = entityManager.find(Book.class, book.getId());
+    assertThat(bookDeleted).isNull();
+  }
+
+
 }
