@@ -18,4 +18,6 @@ public interface BookService {
   void delete(Long bookId);
 
   Page<Book> find(Book book, Pageable pageable);
+
+  Object findByIsbn(String isbn);
 }
