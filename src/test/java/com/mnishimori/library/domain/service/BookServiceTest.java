@@ -54,13 +54,12 @@ class BookServiceTest {
 
   @Test
   public void shouldNotCreateABookWhenIsbnIsDuplicated() throws Exception {
-    var bookFound = createNewBook();
-    bookFound.setId(1L);
-    when(repository.findByIsbn(bookFound.getIsbn())).thenReturn(bookFound);
-
     var book = createNewBook();
+    book.setId(1L);
+    var bookToSave = createNewBook();
+    when(service.findByIsbn(bookToSave.getIsbn())).thenReturn(Optional.of(book));
 
-    assertThatThrownBy(() -> service.save(book))
+    assertThatThrownBy(() -> service.checkIfIsbnAlreadyExists(bookToSave))
         .isInstanceOf(BusinessException.class)
         .hasMessage("ISBN já cadastrado");
 
@@ -75,6 +74,8 @@ class BookServiceTest {
         .thenReturn(Optional.of(book));
 
     var bookFound = service.findById(book.getId());
+
+    assertThat(bookFound.get()).isSameAs(book);
     assertThat(bookFound.isPresent()).isTrue();
     assertThat(bookFound.get().getId()).isEqualTo(book.getId());
     assertThat(bookFound.get().getAuthor()).isEqualTo(book.getAuthor());
@@ -93,6 +94,31 @@ class BookServiceTest {
     var bookFound = service.findById(book.getId());
     assertThat(bookFound.isEmpty()).isTrue();
     verify(repository).findById(book.getId());
+  }
+
+  @Test
+  public void shouldFindABookByIsbn() {
+    var book = createNewBook();
+    book.setId(1L);
+    when(repository.findByIsbn(book.getIsbn()))
+        .thenReturn(Optional.of(book));
+
+    var bookFound = service.findByIsbn(book.getIsbn());
+
+    assertThat(bookFound.get()).isSameAs(book);
+    verify(repository).findByIsbn(book.getIsbn());
+  }
+
+  @Test
+  public void shouldNotFindABookByIsbnWhenIsbnNotExists() {
+    var book = createNewBook();
+    book.setId(1L);
+    when(repository.findByIsbn(book.getIsbn()))
+        .thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> service.findByIsbnRequired(book.getIsbn()))
+        .isInstanceOf(BusinessException.class)
+        .hasMessage("Livro não encontrado");
   }
 
   @Test

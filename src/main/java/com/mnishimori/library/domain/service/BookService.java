@@ -13,11 +13,16 @@ public interface BookService {
 
   Book findByIdRequired(Long id);
 
+  Optional<Book> findByIsbn(String isbn);
+
+  Book findByIsbnRequired(String isbn);
+
+  void checkIfIsbnAlreadyExists(Book bookToSave);
+
+  Page<Book> find(Book book, Pageable pageable);
+
   Book update(Book book);
 
   void delete(Long bookId);
 
-  Page<Book> find(Book book, Pageable pageable);
-
-  Object findByIsbn(String isbn);
 }

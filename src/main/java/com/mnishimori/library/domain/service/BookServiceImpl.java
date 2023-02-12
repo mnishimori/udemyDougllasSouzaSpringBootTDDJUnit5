@@ -1,7 +1,6 @@
 package com.mnishimori.library.domain.service;
 
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.CONTAINING;
-import static org.springframework.data.domain.ExampleMatcher.StringMatcher.STARTING;
 
 import com.mnishimori.library.domain.model.Book;
 import com.mnishimori.library.domain.repository.BookRepository;
@@ -9,7 +8,6 @@ import com.mnishimori.library.exception.BusinessException;
 import java.util.Optional;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.ExampleMatcher.StringMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,8 +23,7 @@ public class BookServiceImpl implements BookService {
 
   @Override
   public Book save(Book book) {
-    var bookFound = repository.findByIsbn(book.getIsbn());
-    checkIfIsbnAlreadyExists(book, bookFound);
+    checkIfIsbnAlreadyExists(book);
     return repository.save(book);
   }
 
@@ -37,6 +34,23 @@ public class BookServiceImpl implements BookService {
   public Book findByIdRequired(Long id) {
     return repository.findById(id)
         .orElseThrow(() -> new BusinessException("Livro não encontrado"));
+  }
+
+  @Override
+  public Optional<Book> findByIsbn(String isbn) {
+    return repository.findByIsbn(isbn);
+  }
+
+  public Book findByIsbnRequired(String isbn) {
+    return repository.findByIsbn(isbn)
+        .orElseThrow(() -> new BusinessException("Livro não encontrado"));
+  }
+
+  public void checkIfIsbnAlreadyExists(Book book) {
+    var bookFound = repository.findByIsbn(book.getIsbn()).orElse(null);
+    if (bookFound != null && !bookFound.getId().equals(book.getId())) {
+      throw new BusinessException("ISBN já cadastrado");
+    }
   }
 
   @Override
@@ -65,9 +79,4 @@ public class BookServiceImpl implements BookService {
     return repository.findAll(example, pageable);
   }
 
-  private static void checkIfIsbnAlreadyExists(Book book, Book bookFound) {
-    if (bookFound != null && !bookFound.getId().equals(book.getId())) {
-      throw new BusinessException("ISBN já cadastrado");
-    }
-  }
 }
