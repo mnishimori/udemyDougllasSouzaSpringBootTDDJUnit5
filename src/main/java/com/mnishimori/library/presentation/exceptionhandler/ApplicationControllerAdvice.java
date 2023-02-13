@@ -152,7 +152,7 @@ public class ApplicationControllerAdvice extends ResponseEntityExceptionHandler 
 
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<?> catchNegocioException(BusinessException e,
-      WebRequest request){
+      WebRequest request) {
 
     HttpStatus status = HttpStatus.BAD_REQUEST;
 
