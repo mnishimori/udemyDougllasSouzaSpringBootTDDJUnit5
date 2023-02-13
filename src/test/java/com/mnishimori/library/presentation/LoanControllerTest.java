@@ -87,4 +87,29 @@ public class LoanControllerTest {
     mvc.perform(request)
         .andExpect(status().isBadRequest());
   }
+
+  @Test
+  public void shouldReturnExceptionWhenCreateAnLoanWithABookAlreadyLoaned() throws Exception {
+    var loanDto = LoanDto.builder().isbn("123").customer("Fulano").build();
+    var json = new ObjectMapper().writeValueAsString(loanDto);
+    var book = Book.builder().id(1L).isbn("123").build();
+    var loan = Loan.builder().id(1L).customer("Fulano").book(book).loanDate(LocalDate.now())
+        .build();
+
+    BDDMockito
+        .given(bookService.findByIsbn(loanDto.getIsbn()))
+        .willReturn(Optional.of(book));
+    BDDMockito
+        .given(loanService.save(any(Loan.class)))
+        .willThrow(new BusinessException("Book already loaned"));
+
+    var request = MockMvcRequestBuilders.post(LOAN_API)
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(json);
+
+    mvc.perform(request)
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+  }
 }
