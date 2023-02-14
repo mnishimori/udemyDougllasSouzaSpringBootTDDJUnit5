@@ -43,7 +43,7 @@ class BookServiceTest {
   @Test
   public void shouldSaveABook() {
     var book = createNewBook();
-    when(service.save(book)).then(AdditionalAnswers.returnsFirstArg());
+    when(repository.save(book)).then(AdditionalAnswers.returnsFirstArg());
 
     var savedBook = service.save(book);
 
