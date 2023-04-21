@@ -7,6 +7,7 @@ import com.mnishimori.library.domain.model.Book;
 import com.mnishimori.library.domain.model.Loan;
 import com.mnishimori.library.domain.repository.LoanRepository;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,12 +25,12 @@ class LoanServiceTest {
   private LoanService service;
 
   @BeforeEach
-  void setUp(){
+  void setUp() {
     service = new LoanServiceImpl(repository);
   }
 
   @Test
-  void shouldSaveALoan(){
+  void shouldSaveALoan() {
     var loan = createNewLoan();
     when(repository.save(loan)).then(AdditionalAnswers.returnsFirstArg());
 
@@ -38,7 +39,33 @@ class LoanServiceTest {
     assertThat(loan).isSameAs(loanSaved);
   }
 
-  private static Loan createNewLoan(){
+  @Test
+  void shouldReturnTrueWhenABookAlreadyLoaned() {
+    var loan = createNewLoan();
+    loan.getBook().setId(1L);
+    loan.setId(1L);
+
+    when(repository.findByBookAndReturned(loan.getBook(), false)).thenReturn(Optional.of(loan));
+
+    var bookAlreadyLoaned = service.isBookAlreadyLoaned(loan.getBook());
+
+    assertThat(bookAlreadyLoaned).isTrue();
+  }
+
+  @Test
+  void shouldReturnFalseWhenABookIsAvailable() {
+    var loan = createNewLoan();
+    loan.getBook().setId(1L);
+    loan.setId(1L);
+
+    when(repository.findByBookAndReturned(loan.getBook(), true)).thenReturn(Optional.of(loan));
+
+    var bookAlreadyLoaned = service.isBookAlreadyLoaned(loan.getBook());
+
+    assertThat(bookAlreadyLoaned).isFalse();
+  }
+
+  private static Loan createNewLoan() {
     var book = createNewBook();
     return Loan.builder()
         .customer("JOSÉ")
